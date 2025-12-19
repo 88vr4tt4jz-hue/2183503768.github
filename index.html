@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>千亿"它经济"背后的情感密码</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.0/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #D4A574;
+            --secondary-color: #8B9467;
+            --accent-color: #E8B86D;
+            --text-dark: #2C3E50;
+            --text-medium: #7F8C8D;
+            --text-light: #ECF0F1;
+            --success-color: #27AE60;
+            --warning-color: #F39C12;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .hero-title {
+            font-family: 'Noto Serif SC', serif;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .data-float {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+            padding: 20px 28px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: float 8s ease-in-out infinite;
+            transition: all 0.3s ease;
+        }
+        
+        .data-float:hover {
+            transform: scale(1.05);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-25px); }
+        }
+        
+        .nav-item {
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .nav-item:hover::before {
+            left: 100%;
+        }
+        
+        .nav-item:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .cta-button {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            outline: none;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 16px 32px rgba(212, 165, 116, 0.4);
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .cta-button:hover::before {
+            left: 100%;
+        }
+        
+        .particle-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.7;
+        }
+        
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2.5s infinite;
+            cursor: pointer;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-15px); }
+            60% { transform: translateX(-50%) translateY(-8px); }
+        }
+        
+        .floating-pet-icon {
+            position: absolute;
+            opacity: 0.1;
+            animation: floatIcon 12s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(-15px) rotate(240deg); }
+        }
+        
+        .section-title {
+            font-family: 'Noto Serif SC', serif;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+        
+        .data-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+            max-width: 280px;
+            line-height: 1.4;
+        }
+        
+        .tooltip.show {
+            opacity: 1;
+        }
+        
+        /* 底部导航栏样式 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 12px 0;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .page-dot {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .page-dot:hover {
+            transform: scale(1.2);
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .data-float {
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .data-float .text-3xl {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 粒子背景 -->
+    <div id="particle-container" class="particle-bg"></div>
+    
+    <!-- 浮动宠物图标 -->
+    <div class="floating-pet-icon top-20 right-20 text-6xl">🐕</div>
+    <div class="floating-pet-icon top-1/3 left-16 text-4xl">🐱</div>
+    <div class="floating-pet-icon bottom-1/4 right-1/3 text-5xl">🐰</div>
+    <div class="floating-pet-icon top-1/2 right-1/4 text-3xl">🐦</div>
+    
+    <!-- 主容器 -->
+    <div class="min-h-screen flex flex-col">
+        <!-- 导航栏 -->
+        <nav class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md z-50 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-xl font-bold text-gray-800">宠物经济报告</h1>
+                </div>
+                <div class="text-sm text-gray-600">
+                    千亿"它经济"背后的情感密码
+                </div>
+            </div>
+        </nav>
+
+        <!-- 封面区域 -->
+        <section class="relative min-h-screen flex items-center justify-center px-4 overflow-hidden">
+            <!-- 主视觉背景 -->
+            <div class="absolute inset-0 z-0">
+                <div class="w-full h-full bg-gradient-to-br from-orange-50 via-white to-green-50 opacity-80"></div>
+                <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200&h=800&fit=crop" alt="宠物与主人温馨互动" class="w-full h-full object-cover opacity-30">
+            </div>
+            
+            <!-- 浮动数据卡片 -->
+            <div class="data-float top-20 left-10" style="animation-delay: 0s;">
+                <div class="text-center">
+                    <div class="data-number text-4xl font-bold mb-2">7013亿</div>
+                    <div class="text-sm text-gray-600 font-medium">2024年市场规模</div>
+                    <div class="text-xs text-gray-500 mt-1">同比增长18.3%</div>
+                </div>
+            </div>
+            
+            <div class="data-float top-32 right-16" style="animation-delay: 2s;">
+                <div class="text-center">
+                    <div class="data-number text-4xl font-bold mb-2">4.3亿</div>
+                    <div class="text-sm text-gray-600 font-medium">宠物总量</div>
+                    <div class="text-xs text-gray-500 mt-1">犬猫为主力</div>
+                </div>
+            </div>
+            
+            <div class="data-float bottom-40 left-20" style="animation-delay: 4s;">
+                <div class="text-center">
+                    <div class="data-number text-4xl font-bold mb-2">30%+</div>
+                    <div class="text-sm text-gray-600 font-medium">家庭渗透率</div>
+                    <div class="text-xs text-gray-500 mt-1">仍有2-3倍增长空间</div>
+                </div>
+            </div>
+            
+            <!-- 主要内容 -->
+            <div class="relative z-10 text-center max-w-5xl mx-auto">
+                <h1 class="hero-title text-6xl md:text-8xl font-bold mb-8 leading-tight">
+                    千亿"它经济"背后的情感密码
+                </h1>
+                
+                <p class="text-2xl md:text-3xl text-gray-700 mb-10 font-light leading-relaxed">
+                    1.24亿只宠物如何重构中国消费图景
+                </p>
+                
+                <div class="space-y-8">
+                    <button id="unlockBtn" class="cta-button text-white px-16 py-5 rounded-full text-xl font-medium shadow-2xl">
+                        <span class="flex items-center justify-center space-x-3">
+                            <span>解锁增长密码</span>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </span>
+                    </button>
+                    
+                    <div class="text-sm text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                        数据来源：中国畜牧业协会《2025中国宠物行业白皮书》、毕马威中国《2025年中国宠物行业市场报告》、艾瑞咨询、中商产业研究院等权威机构
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 滚动指示器 -->
+            <div class="scroll-indicator" id="scrollIndicator">
+                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+            </div>
+        </section>
+        
+        <!-- 导航区域 -->
+        <section class="py-20 px-4 bg-white/90 backdrop-blur-md" id="navigation">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="section-title text-4xl font-bold text-center mb-16 text-gray-800">探索宠物经济全景</h2>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+                    <!-- 市场全景 -->
+                    <div class="nav-item bg-gradient-to-br from-orange-100 to-orange-200 p-8 rounded-3xl text-center shadow-lg" data-page="market-overview" data-tooltip="从3000亿到万亿的增长密码，解析市场规模动态、渗透率对比及区域分布热力图">
+                        <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-800 mb-3 text-lg">市场全景</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed">从3000亿到万亿的增长密码</p>
+                    </div>
+                    
+                    <!-- 消费主体 -->
+                    <div class="nav-item bg-gradient-to-br from-green-100 to-green-200 p-8 rounded-3xl text-center shadow-lg" data-page="consumer-profile" data-tooltip="Z世代定义新养宠范式，深度分析年龄性别消费关联、人群画像及社交媒体趋势">
+                        <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-800 mb-3 text-lg">消费主体</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed">Z世代定义新养宠范式</p>
+                    </div>
+                    
+                    <!-- 产业链洞察 -->
+                    <div class="nav-item bg-gradient-to-br from-blue-100 to-blue-200 p-8 rounded-3xl text-center shadow-lg" data-page="industry-chain" data-tooltip="从基础喂养到全生命周期服务，解析市场结构、智能设备增长及成分对比">
+                        <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-800 mb-3 text-lg">产业链洞察</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed">从基础喂养到全生命周期服务</p>
+                    </div>
+                    
+                    <!-- 政策资本 -->
+                    <div class="nav-item bg-gradient-to-br from-purple-100 to-purple-200 p-8 rounded-3xl text-center shadow-lg" data-page="policy-capital" data-tooltip="双轮驱动行业变革，政策时间轴、企业竞争力分析及专家视角解读">
+                        <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-800 mb-3 text-lg">政策与资本</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed">双轮驱动行业变革</p>
+                    </div>
+                    
+                    <!-- 社会镜像 -->
+                    <div class="nav-item bg-gradient-to-br from-pink-100 to-pink-200 p-8 rounded-3xl text-center shadow-lg" data-page="social-mirror" data-tooltip="宠物治愈当代孤独，深度分析单身人口、抑郁症与养宠数量的相关性">
+                        <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-pink-400 to-pink-600 rounded-full flex items-center justify-center shadow-lg">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-800 mb-3 text-lg">社会镜像</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed">宠物治愈当代孤独</p>
+                    </div>
+                    
+                    <!-- 公益联动 -->
+                    <div class="nav-item bg-gradient-to-br from-teal-100 to-teal-200 p-8 rounded-3xl text-center shadow-lg" data-page="conclusion" data-tooltip="共建美好宠物生态，流浪动物领养平台及政策建议">
+                        <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-teal-400 to-teal-600 rounded-full flex items-center justify-center shadow-lg">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-800 mb-3 text-lg">公益联动</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed">共建美好宠物生态</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 快速数据预览 -->
+            <section class="py-16 px-4 bg-gradient-to-r from-orange-50 to-green-50">
+                <div class="max-w-6xl mx-auto">
+                    <h3 class="text-2xl font-bold text-center mb-12 text-gray-800">核心数据一览</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                        <div class="text-center">
+                            <div class="data-number text-3xl font-bold mb-2">8114亿</div>
+                            <div class="text-sm text-gray-600">2025年预计规模</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="data-number text-3xl font-bold mb-2">25.4%</div>
+                            <div class="text-sm text-gray-600">年复合增长率</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="data-number text-3xl font-bold mb-2">70%</div>
+                            <div class="text-sm text-gray-600">美国渗透率标杆</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="data-number text-3xl font-bold mb-2">9000万</div>
+                            <div class="text-sm text-gray-600">流浪动物数量</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 底部信息 -->
+            <footer class="py-12 px-4 bg-gray-900 text-white">
+                <div class="max-w-6xl mx-auto text-center">
+                    <div class="mb-6">
+                        <h4 class="text-lg font-bold mb-2">制作团队</h4>
+                        <div class="text-sm text-gray-300 space-y-1">
+                            <p><span class="font-medium">李昊</span>：项目负责人，前端开发，数据分析</p>
+                            <p><span class="font-medium">刘璐琦</span>：UI设计，内容策划，视觉设计</p>
+                            <p><span class="font-medium">张舒畅</span>：文案编辑，数据收集，数据研究</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h4 class="text-lg font-bold mb-2">联系我们</h4>
+                        <div class="text-sm text-gray-300 space-y-1">
+                            <p>邮箱：2183503768@qq.com</p>
+                            <p>电话：13651525318</p>
+                            <p>地址：江苏省南京市三江学院</p>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-700 pt-6">
+                        <div class="text-sm text-gray-400 mb-2">
+                            © 2025 宠物经济研究报告 | 版权所有
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            数据来源：中国畜牧业协会、毕马威、艾瑞咨询、中商产业研究院、派读宠物、亚宠研究院、艾媒咨询等权威机构
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+        
+        <!-- 工具提示 -->
+        <div id="tooltip" class="tooltip"></div>
+        
+        <!-- 新的底部导航栏脚本 -->
+        <script src="new-navigation.js"></script>
+    </body>
+    
+    <script src="main.js"></script>
+    </html>

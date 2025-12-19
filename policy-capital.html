@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>政策与资本 - 千亿"它经济"背后的情感密码</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.0/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #D4A574;
+            --secondary-color: #8B9467;
+            --accent-color: #E8B86D;
+            --text-dark: #2C3E50;
+            --text-medium: #7F8C8D;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .section-title {
+            font-family: 'Noto Serif SC', serif;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .chart-container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+        
+        .timeline-container {
+            position: relative;
+            padding: 20px 0;
+        }
+        
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--primary-color), var(--accent-color));
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 40px;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .timeline-item.show {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s ease;
+        }
+        
+        .timeline-item:nth-child(odd) .timeline-content {
+            margin-right: 60%;
+            text-align: right;
+        }
+        
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-left: 60%;
+            text-align: left;
+        }
+        
+        .timeline-content {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-content:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            top: 20px;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-color);
+            border: 4px solid white;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+        
+        .company-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .company-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .expert-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 24px;
+            color: white;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .policy-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .policy-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .policy-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+        }
+        
+        .policy-modal.show .policy-modal-content {
+            transform: scale(1);
+        }
+        
+        .floating-pet-icon {
+            position: absolute;
+            opacity: 0.1;
+            animation: floatIcon 12s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(-15px) rotate(240deg); }
+        }
+        
+        .investment-hotspot {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 8px 0;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .investment-hotspot:hover {
+            transform: translateX(8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .trend-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        
+        .trend-up {
+            background: #27AE60;
+            color: white;
+        }
+        
+        .trend-down {
+            background: #E74C3C;
+            color: white;
+        }
+        
+        .trend-stable {
+            background: #95A5A6;
+            color: white;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 12px 0;
+            z-index: 1000;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .nav-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .nav-btn-prev {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-medium);
+        }
+        
+        .nav-btn-prev:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-btn-next {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .nav-btn-next:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-home {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .nav-btn-home:hover {
+            background: var(--text-medium);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <button onclick="history.back()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    <span>返回</span>
+                </button>
+                <h1 class="text-xl font-bold text-gray-800">政策与资本</h1>
+            </div>
+            <div class="text-sm text-gray-600">
+                双轮驱动行业变革
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main class="pt-20 px-4 pb-24">
+        <div class="max-w-7xl mx-auto">
+            <!-- 页面标题 -->
+            <div class="text-center mb-12 pt-8">
+                <h1 class="section-title text-4xl md:text-6xl font-bold mb-6">
+                    政策与资本
+                </h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    双轮驱动行业变革，政策扶持与资本投资共同推动宠物经济快速发展
+                </p>
+            </div>
+
+            <!-- 浮动图标 -->
+            <div class="floating-pet-icon top-32 right-20 text-6xl">🐕</div>
+            <div class="floating-pet-icon top-1/2 left-16 text-4xl">🐱</div>
+            <div class="floating-pet-icon bottom-1/4 right-1/3 text-5xl">🐰</div>
+
+            <!-- 第一行内容 -->
+            <div class="grid lg:grid-cols-3 gap-8 mb-8">
+                <!-- 政策时间轴 -->
+                <div class="chart-container lg:col-span-2">
+                    <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                        <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                        政策发展时间轴（2020-2025年）
+                    </h3>
+                    <div class="timeline-container">
+                        <div class="timeline-line"></div>
+                        
+                        <div class="timeline-item" data-year="2020">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content" onclick="showPolicyDetail('2020')">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-bold text-gray-800">2020年</h4>
+                                    <span class="trend-indicator trend-up">规范</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">农业农村部规范宠物饲料标签</p>
+                                <p class="text-xs text-gray-500">行业标准初步建立</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item" data-year="2022">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content" onclick="showPolicyDetail('2022')">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-bold text-gray-800">2022年</h4>
+                                    <span class="trend-indicator trend-up">友好</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">深圳首批宠物友好公园开放</p>
+                                <p class="text-xs text-gray-500">公共空间宠物友好化</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item" data-year="2023">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content" onclick="showPolicyDetail('2023')">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-bold text-gray-800">2023年</h4>
+                                    <span class="trend-indicator trend-up">规划</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">无锡出台宠物经济三年行动计划</p>
+                                <p class="text-xs text-gray-500">目标2027年规模达30亿元</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item" data-year="2024">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content" onclick="showPolicyDetail('2024')">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-bold text-gray-800">2024年</h4>
+                                    <span class="trend-indicator trend-up">创新</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">佛山打造宠物产业园</p>
+                                <p class="text-xs text-gray-500">深圳试点宠物医院使用人药</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item" data-year="2025">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content" onclick="showPolicyDetail('2025')">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-bold text-gray-800">2025年</h4>
+                                    <span class="trend-indicator trend-up">科技</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">晓闻科技完成数千万元天使轮融资</p>
+                                <p class="text-xs text-gray-500">AI兽医助手进入医院试点</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 资本投资热点 -->
+                <div class="chart-container">
+                    <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                        <span class="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
+                        资本投资热点
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="investment-hotspot">
+                            <h4 class="font-bold mb-2">🩸 宠物血库</h4>
+                            <p class="text-sm opacity-90">国内缺口达70%，市场潜力巨大</p>
+                            <div class="text-xs mt-2 opacity-80">投资热度: ⭐⭐⭐⭐⭐</div>
+                        </div>
+                        
+                        <div class="investment-hotspot">
+                            <h4 class="font-bold mb-2">🧬 基因检测</h4>
+                            <p class="text-sm opacity-90">渗透率不足1%，空间可达百亿级</p>
+                            <div class="text-xs mt-2 opacity-80">投资热度: ⭐⭐⭐⭐⭐</div>
+                        </div>
+                        
+                        <div class="investment-hotspot">
+                            <h4 class="font-bold mb-2">🔬 干细胞治疗</h4>
+                            <p class="text-sm opacity-90">高校、企业、医院三方合作</p>
+                            <div class="text-xs mt-2 opacity-80">投资热度: ⭐⭐⭐⭐</div>
+                        </div>
+                        
+                        <div class="investment-hotspot">
+                            <h4 class="font-bold mb-2">🤖 AI兽医助手</h4>
+                            <p class="text-sm opacity-90">晓闻科技获数千万元天使轮</p>
+                            <div class="text-xs mt-2 opacity-80">投资热度: ⭐⭐⭐⭐</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第二行内容 -->
+            <div class="grid lg:grid-cols-2 gap-8 mb-8">
+                <!-- 头部企业雷达图 -->
+                <div class="chart-container">
+                    <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                        <span class="w-3 h-3 bg-blue-500 rounded-full mr-3"></span>
+                        头部企业综合竞争力
+                    </h3>
+                    <div id="companyRadarChart" class="h-96"></div>
+                    <div class="mt-4 grid grid-cols-2 gap-4">
+                        <div class="company-card" onclick="showCompanyDetail('乖宝')">
+                            <h4 class="font-bold text-red-800 mb-2">乖宝宠物</h4>
+                            <div class="text-sm text-gray-600 space-y-1">
+                                <div>市值: <span class="font-bold text-red-600">282亿</span></div>
+                                <div>研发投入: <span class="font-bold">1.51%</span></div>
+                                <div>市场份额: <span class="font-bold">6.8%</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="company-card" onclick="showCompanyDetail('中宠')">
+                            <h4 class="font-bold text-blue-800 mb-2">中宠股份</h4>
+                            <div class="text-sm text-gray-600 space-y-1">
+                                <div>市值: <span class="font-bold text-blue-600">166亿</span></div>
+                                <div>研发投入: <span class="font-bold">1.63%</span></div>
+                                <div>市场份额: <span class="font-bold">3.5%</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 专家视角 -->
+                <div class="chart-container">
+                    <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                        <span class="w-3 h-3 bg-purple-500 rounded-full mr-3"></span>
+                        专家视角
+                    </h3>
+                    <div class="expert-card">
+                        <div class="flex items-center mb-4">
+                            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                                <span class="text-2xl">👨‍🔬</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">中国农业大学</h4>
+                                <p class="text-sm opacity-90">宠物营养学教授</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4 text-sm">
+                            <div class="bg-white/20 rounded-lg p-4">
+                                <h5 class="font-bold mb-2">💡 前沿观点</h5>
+                                <p class="opacity-90">宠物血库建设刻不容缓，国内缺口达70%，急需社会资本投入</p>
+                            </div>
+                            
+                            <div class="bg-white/20 rounded-lg p-4">
+                                <h5 class="font-bold mb-2">🔬 技术突破</h5>
+                                <p class="opacity-90">基因检测技术成熟，但渗透率不足1%，政策放开后市场空间巨大</p>
+                            </div>
+                            
+                            <div class="bg-white/20 rounded-lg p-4">
+                                <h5 class="font-bold mb-2">🏥 临床应用</h5>
+                                <p class="opacity-90">干细胞治疗需要高校、企业、医院三方合作加速转化</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 text-center">
+                            <button class="bg-white text-purple-600 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors">
+                                观看完整访谈
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 投资趋势分析 -->
+            <div class="chart-container mb-8">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                    <span class="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
+                    投资趋势分析
+                </h3>
+                <div id="investmentTrendChart" class="h-80"></div>
+                <div class="mt-6 grid md:grid-cols-3 gap-6">
+                    <div class="text-center p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-xl">
+                        <div class="text-3xl font-bold text-red-600 mb-2">70%</div>
+                        <div class="text-sm text-red-700">宠物血库缺口</div>
+                        <div class="text-xs text-red-600 mt-1">急需社会资本投入</div>
+                    </div>
+                    <div class="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+                        <div class="text-3xl font-bold text-blue-600 mb-2">1%</div>
+                        <div class="text-sm text-blue-700">基因检测渗透率</div>
+                        <div class="text-xs text-blue-600 mt-1">政策放开后空间巨大</div>
+                    </div>
+                    <div class="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
+                        <div class="text-3xl font-bold text-green-600 mb-2">30%</div>
+                        <div class="text-sm text-green-700">智能设备年增速</div>
+                        <div class="text-xs text-green-600 mt-1">科技赋能养宠体验</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+
+    <!-- 政策详情弹窗 -->
+    <div class="policy-modal" id="policyModal">
+        <div class="policy-modal-content">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold" id="modalTitle">政策详情</h3>
+                <button onclick="closePolicyModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="modalContent">
+                <!-- 内容将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            initTimeline();
+            initAnimations();
+        });
+
+        // 初始化图表
+        function initCharts() {
+            initCompanyRadarChart();
+            initInvestmentTrendChart();
+        }
+
+        // 企业雷达图
+        function initCompanyRadarChart() {
+            const chart = echarts.init(document.getElementById('companyRadarChart'));
+            
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(0,0,0,0.9)',
+                    borderColor: 'transparent',
+                    textStyle: { color: '#fff' }
+                },
+                legend: {
+                    data: ['乖宝宠物', '中宠股份'],
+                    textStyle: { color: '#6B7280' }
+                },
+                radar: {
+                    indicator: [
+                        { name: '研发投入占比', max: 5 },
+                        { name: '市场份额', max: 5 },
+                        { name: '渠道覆盖', max: 5 },
+                        { name: '品牌价值', max: 5 },
+                        { name: '创新能力', max: 5 }
+                    ],
+                    center: ['50%', '55%'],
+                    radius: '65%',
+                    axisName: {
+                        color: '#6B7280',
+                        fontSize: 12
+                    },
+                    splitLine: {
+                        lineStyle: { color: '#E5E7EB' }
+                    },
+                    splitArea: {
+                        show: false
+                    }
+                },
+                series: [{
+                    name: '企业竞争力',
+                    type: 'radar',
+                    data: [
+                        {
+                            value: [3.5, 4.5, 4.2, 4.8, 4.0],
+                            name: '乖宝宠物',
+                            itemStyle: { color: '#E63946' },
+                            areaStyle: { color: 'rgba(230, 57, 70, 0.2)' }
+                        },
+                        {
+                            value: [4.0, 3.0, 4.5, 3.5, 3.8],
+                            name: '中宠股份',
+                            itemStyle: { color: '#457B9D' },
+                            areaStyle: { color: 'rgba(69, 123, 157, 0.2)' }
+                        }
+                    ]
+                }]
+            };
+            
+            chart.setOption(option);
+            
+            // 响应式
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        // 投资趋势图
+        function initInvestmentTrendChart() {
+            const chart = echarts.init(document.getElementById('investmentTrendChart'));
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(0,0,0,0.9)',
+                    borderColor: 'transparent',
+                    textStyle: { color: '#fff' },
+                    formatter: function(params) {
+                        let result = params[0].name + '<br/>';
+                        params.forEach(param => {
+                            result += param.seriesName + ': ' + param.value + '亿元<br/>';
+                        });
+                        return result;
+                    }
+                },
+                legend: {
+                    data: ['融资总额', '投资案例数'],
+                    textStyle: { color: '#6B7280' }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['2020', '2021', '2022', '2023', '2024', '2025E'],
+                    axisLine: { lineStyle: { color: '#E5E7EB' } },
+                    axisLabel: { color: '#6B7280' }
+                },
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '融资总额(亿元)',
+                        nameTextStyle: { color: '#6B7280' },
+                        axisLine: { lineStyle: { color: '#E5E7EB' } },
+                        axisLabel: { color: '#6B7280' },
+                        splitLine: { lineStyle: { color: '#F3F4F6' } }
+                    },
+                    {
+                        type: 'value',
+                        name: '投资案例数',
+                        nameTextStyle: { color: '#6B7280' },
+                        axisLine: { lineStyle: { color: '#E5E7EB' } },
+                        axisLabel: { color: '#6B7280' },
+                        splitLine: { show: false }
+                    }
+                ],
+                series: [
+                    {
+                        name: '融资总额',
+                        type: 'bar',
+                        data: [15, 28, 45, 62, 78, 95],
+                        itemStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0, y: 0, x2: 0, y2: 1,
+                                colorStops: [
+                                    { offset: 0, color: '#4FACFE' },
+                                    { offset: 1, color: '#00F2FE' }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        name: '投资案例数',
+                        type: 'line',
+                        yAxisIndex: 1,
+                        data: [12, 25, 38, 52, 68, 85],
+                        itemStyle: { color: '#FF6B6B' },
+                        lineStyle: { width: 3 },
+                        symbol: 'circle',
+                        symbolSize: 8
+                    }
+                ]
+            };
+            
+            chart.setOption(option);
+            
+            // 响应式
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        // 初始化时间轴
+        function initTimeline() {
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('show');
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            timelineItems.forEach(item => {
+                observer.observe(item);
+            });
+        }
+
+        // 初始化动画
+        function initAnimations() {
+            // 图表容器动画
+            anime({
+                targets: '.chart-container',
+                opacity: [0, 1],
+                translateY: [30, 0],
+                duration: 800,
+                delay: anime.stagger(200),
+                easing: 'easeOutQuad'
+            });
+            
+            // 企业卡片动画
+            anime({
+                targets: '.company-card',
+                opacity: [0, 1],
+                scale: [0.8, 1],
+                duration: 600,
+                delay: anime.stagger(100, {start: 600}),
+                easing: 'easeOutBack'
+            });
+            
+            // 投资热点动画
+            anime({
+                targets: '.investment-hotspot',
+                opacity: [0, 1],
+                translateX: [-30, 0],
+                duration: 600,
+                delay: anime.stagger(150, {start: 800}),
+                easing: 'easeOutQuad'
+            });
+        }
+
+        // 显示政策详情
+        function showPolicyDetail(year) {
+            const policyData = {
+                '2020': {
+                    title: '2020年 - 农业农村部规范宠物饲料标签',
+                    content: `
+                        <div class="space-y-4">
+                            <p><strong>政策内容：</strong>农业农村部发布《宠物饲料标签规定》，对宠物饲料的标签标识、营养成分、生产日期等作出明确要求。</p>
+                            <p><strong>行业影响：</strong></p>
+                            <ul class="list-disc list-inside space-y-1 ml-4">
+                                <li>规范市场秩序，提升产品质量</li>
+                                <li>增强消费者信任度</li>
+                                <li>推动行业标准化发展</li>
+                                <li>为后续政策制定奠定基础</li>
+                            </ul>
+                            <p><strong>市场反应：</strong>头部企业积极响应，中小企业逐步适应，整体行业向规范化方向发展。</p>
+                        </div>
+                    `
+                },
+                '2022': {
+                    title: '2022年 - 深圳首批宠物友好公园开放',
+                    content: `
+                        <div class="space-y-4">
+                            <p><strong>政策内容：</strong>深圳市在城市公园中设立专门的宠物活动区域，允许宠物进入特定空间。</p>
+                            <p><strong>创新意义：</strong></p>
+                            <ul class="list-disc list-inside space-y-1 ml-4">
+                                <li>打破公共空间禁宠传统</li>
+                                <li>提升城市宠物友好度</li>
+                                <li>促进人宠和谐共处</li>
+                                <li>为其他城市提供示范</li>
+                            </ul>
+                            <p><strong>社会效应：</strong>提升养宠人群幸福感，促进宠物社会化，推动相关服务业发展。</p>
+                        </div>
+                    `
+                },
+                '2023': {
+                    title: '2023年 - 无锡出台宠物经济三年行动计划',
+                    content: `
+                        <div class="space-y-4">
+                            <p><strong>政策内容：</strong>无锡市政府发布《宠物经济发展三年行动计划》，提出到2027年宠物经济规模达到30亿元的目标。</p>
+                            <p><strong>主要措施：</strong></p>
+                            <ul class="list-disc list-inside space-y-1 ml-4">
+                                <li>建设宠物产业园区</li>
+                                <li>培育龙头企业</li>
+                                <li>完善产业链条</li>
+                                <li>优化营商环境</li>
+                            </ul>
+                            <p><strong>预期效果：</strong>集聚产业资源，降低企业运营成本，形成产业集群效应。</p>
+                        </div>
+                    `
+                },
+                '2024': {
+                    title: '2024年 - 佛山打造宠物产业园',
+                    content: `
+                        <div class="space-y-4">
+                            <p><strong>政策内容：</strong>佛山市规划建设宠物产业园，目标2027年规模达30亿元；深圳试点宠物医院使用人药。</p>
+                            <p><strong>突破意义：</strong></p>
+                            <ul class="list-disc list-inside space-y-1 ml-4">
+                                <li>打破药品使用壁垒</li>
+                                <li>降低宠物医疗成本</li>
+                                <li>提升治疗效果</li>
+                                <li>推动医疗创新</li>
+                            </ul>
+                            <p><strong>行业反响：</strong>宠物医疗行业迎来重大利好，企业投资热情高涨。</p>
+                        </div>
+                    `
+                },
+                '2025': {
+                    title: '2025年 - 晓闻科技完成数千万元天使轮融资',
+                    content: `
+                        <div class="space-y-4">
+                            <p><strong>融资信息：</strong>晓闻科技聚焦AI兽医助手，完成数千万元天使轮融资，产品进入医院试点阶段。</p>
+                            <p><strong>技术创新：</strong></p>
+                            <ul class="list-disc list-inside space-y-1 ml-4">
+                                <li>AI辅助诊断</li>
+                                <li>智能问诊系统</li>
+                                <li>远程医疗支持</li>
+                                <li>降低医疗门槛</li>
+                            </ul>
+                            <p><strong>市场前景：</strong>AI技术在宠物医疗领域的应用将大幅提升诊疗效率和准确性。</p>
+                        </div>
+                    `
+                }
+            };
+            
+            const modal = document.getElementById('policyModal');
+            const title = document.getElementById('modalTitle');
+            const content = document.getElementById('modalContent');
+            
+            if (policyData[year]) {
+                title.textContent = policyData[year].title;
+                content.innerHTML = policyData[year].content;
+                modal.classList.add('show');
+            }
+        }
+
+        // 关闭政策弹窗
+        function closePolicyModal() {
+            document.getElementById('policyModal').classList.remove('show');
+        }
+
+        // 显示企业详情
+        function showCompanyDetail(company) {
+            const companyData = {
+                '乖宝': {
+                    name: '乖宝宠物',
+                    marketCap: '282亿',
+                    rdRatio: '1.51%',
+                    marketShare: '6.8%',
+                    brands: '麦富迪品牌',
+                    channels: '全球化研发三角体系（泰国+上海+聊城）',
+                    sales: '全网销售额年破11亿元'
+                },
+                '中宠': {
+                    name: '中宠股份',
+                    marketCap: '166亿',
+                    rdRatio: '1.63%',
+                    marketShare: '3.5%',
+                    brands: '顽皮+Toptrees品牌',
+                    channels: '全球22家生产基地',
+                    sales: '覆盖中、美、加等多国市场'
+                }
+            };
+            
+            const data = companyData[company];
+            if (data) {
+                alert(`${data.name}\n\n市值: ${data.marketCap}\n研发投入占比: ${data.rdRatio}\n市场份额: ${data.marketShare}\n核心品牌: ${data.brands}\n渠道布局: ${data.channels}\n销售表现: ${data.sales}`);
+            }
+        }
+
+        // 页面导航
+        function navigateToPage(page) {
+            // 添加页面切换动画
+            anime({
+                targets: 'body',
+                opacity: [1, 0.8],
+                duration: 300,
+                easing: 'easeOutQuad',
+                complete: function() {
+                    window.location.href = `${page}.html`;
+                }
+            });
+        }
+
+        // 点击弹窗外部关闭
+        document.getElementById('policyModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePolicyModal();
+            }
+        });
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // ESC键关闭弹窗
+            if (e.key === 'Escape') {
+                closePolicyModal();
+            }
+            
+            // 数字键1-6快速导航
+            const pageMap = {
+                '1': 'market-overview',
+                '2': 'consumer-profile',
+                '3': 'industry-chain',
+                '4': 'policy-capital',
+                '5': 'social-mirror',
+                '6': 'conclusion'
+            };
+            
+            if (pageMap[e.key]) {
+                navigateToPage(pageMap[e.key]);
+            }
+        });
+    </script>
+    
+    <!-- 新的底部导航栏脚本 -->
+    <script src="new-navigation.js"></script>
+</body>
+</html>

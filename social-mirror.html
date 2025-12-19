@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社会镜像 - 千亿"它经济"背后的情感密码</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.0/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #D4A574;
+            --secondary-color: #8B9467;
+            --accent-color: #E8B86D;
+            --text-dark: #2C3E50;
+            --text-medium: #7F8C8D;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding-bottom: 120px;
+        }
+        
+        .section-title {
+            font-family: 'Noto Serif SC', serif;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .chart-container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+        
+        .correlation-highlight {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+        }
+        
+        .medical-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .medical-before,
+        .medical-after {
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .medical-before {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        }
+        
+        .medical-after {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+        
+        /* 用户真实治愈故事样式 - 融合原H5风格 */
+        .story-highlight {
+            background: linear-gradient(135deg, rgba(212, 165, 116, 0.1) 0%, rgba(232, 184, 109, 0.1) 100%);
+            border: 1px solid rgba(212, 165, 116, 0.2);
+        }
+        
+        .story-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .story-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .story-card:hover::before {
+            left: 100%;
+        }
+        
+        .story-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* 分享故事表单样式 */
+        .story-form-container {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            border-radius: 20px;
+            padding: 32px;
+            color: white;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-input {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: white;
+            width: 100%;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .floating-pet-icon {
+            position: absolute;
+            opacity: 0.1;
+            animation: floatIcon 12s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(-15px) rotate(240deg); }
+        }
+        
+        .impact-stat {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .impact-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #e74c3c, #f39c12);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 12px 0;
+            z-index: 1000;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .nav-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .nav-btn-prev {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-medium);
+        }
+        
+        .nav-btn-prev:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-btn-next {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .nav-btn-next:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-home {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .nav-btn-home:hover {
+            background: var(--text-medium);
+            transform: translateY(-2px);
+        }
+        
+        .floating-heart {
+            position: absolute;
+            color: #e74c3c;
+            font-size: 2rem;
+            animation: floatHeart 4s ease-in-out infinite;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+        
+        @keyframes floatHeart {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-20px) scale(1.2); }
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-animate.animate-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .floating-action {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            z-index: 100;
+        }
+        
+        .fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            box-shadow: 0 4px 16px rgba(212, 165, 116, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(212, 165, 116, 0.6);
+        }
+        
+        .story-showcase {
+            backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <button onclick="history.back()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    <span>返回</span>
+                </button>
+                <h1 class="text-xl font-bold text-gray-800">社会镜像</h1>
+            </div>
+            <div class="text-sm text-gray-600">
+                宠物治愈当代孤独
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main class="pt-20 px-4 pb-24">
+        <div class="max-w-7xl mx-auto">
+            <!-- 页面标题 -->
+            <div class="text-center mb-12 pt-8">
+                <h1 class="section-title text-4xl md:text-6xl font-bold mb-6">
+                    社会镜像
+                </h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    宠物治愈当代孤独，深度分析单身人口、抑郁症与养宠数量的相关性及社会影响
+                </p>
+            </div>
+
+            <!-- 浮动图标 -->
+            <div class="floating-pet-icon top-32 right-20 text-6xl">🐕</div>
+            <div class="floating-pet-icon top-1/2 left-16 text-4xl">🐱</div>
+            <div class="floating-pet-icon bottom-1/4 right-1/3 text-5xl">🐰</div>
+            <div class="floating-heart top-1/3 right-1/4">❤️</div>
+            <div class="floating-heart bottom-1/3 left-1/3">💖</div>
+
+            <!-- 相关性散点图 -->
+            <div class="chart-container mb-8">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                    <span class="w-3 h-3 bg-purple-500 rounded-full mr-3"></span>
+                    单身人口-抑郁症-养宠数量相关性分析
+                </h3>
+                <div id="correlationChart" class="h-96"></div>
+                <div class="mt-4 correlation-highlight">
+                    <div class="text-2xl font-bold text-red-800 mb-2">R² = 0.87</div>
+                    <p class="text-sm text-red-700">
+                        城市单身率与养宠数量呈现强正相关关系，宠物成为情感寄托的重要载体
+                    </p>
+                </div>
+            </div>
+
+            <!-- 宠物医保对比 -->
+            <div class="chart-container mb-8">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    宠物医保经济效应分析
+                </h3>
+                <div class="medical-comparison">
+                    <div class="medical-before">
+                        <h4 class="font-bold text-red-800 mb-4">报销前</h4>
+                        <div class="text-3xl font-bold text-red-600 mb-2">1.8万元</div>
+                        <p class="text-sm text-red-700">宠物肾病手术平均费用</p>
+                        <div class="mt-4 text-xs text-red-600">
+                            经济负担较重，弃养率较高
+                        </div>
+                    </div>
+                    
+                    <div class="medical-after">
+                        <h4 class="font-bold text-green-800 mb-4">报销后</h4>
+                        <div class="text-3xl font-bold text-green-600 mb-2">7200元</div>
+                        <p class="text-sm text-green-700">平均支付费用</p>
+                        <div class="mt-4 text-xs text-green-600">
+                            节省60%，弃养率下降15%
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl">
+                    <h4 class="font-bold text-gray-800 mb-3">医保附加效益</h4>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-600">+30%</div>
+                            <div class="text-gray-600">复诊率提升</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-600">-15%</div>
+                            <div class="text-gray-600">弃养率下降</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 用户真实治愈故事 - 替换为healing-stories.html内容 -->
+            <div class="chart-container mb-8 scroll-animate">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                    <span class="w-3 h-3 bg-pink-500 rounded-full mr-3"></span>
+                    用户真实治愈故事
+                </h3>
+                <p class="text-sm text-gray-600 mb-8">点击卡片查看完整故事</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- 疾病陪伴故事 -->
+                    <div class="story-card" onclick="showStory('cancer')">
+                        <div class="w-16 h-16 bg-pink-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <svg class="w-8 h-8 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 mb-3 text-center">疾病陪伴</h3>
+                        <p class="text-sm text-gray-600 text-center mb-4">"它陪我抗癌，是我活下去的勇气。"</p>
+                        <div class="text-xs text-pink-600 text-center">点击查看故事 →</div>
+                    </div>
+                    
+                    <!-- 老年情感故事 -->
+                    <div class="story-card" onclick="showStory('elderly')">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 mb-3 text-center">老年情感</h3>
+                        <p class="text-sm text-gray-600 text-center mb-4">"孩子不在身边，它是我的'老来伴'。"</p>
+                        <div class="text-xs text-blue-600 text-center">点击查看故事 →</div>
+                    </div>
+                    
+                    <!-- 城市奋斗故事 -->
+                    <div class="story-card" onclick="showStory('career')">
+                        <div class="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 mb-3 text-center">城市奋斗</h3>
+                        <p class="text-sm text-gray-600 text-center mb-4">"加班到深夜，看到它就有了家的感觉。"</p>
+                        <div class="text-xs text-green-600 text-center">点击查看故事 →</div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 bg-white/70 p-6 rounded-lg">
+                    <h4 class="font-semibold text-gray-800 mb-4">养宠人群分布数据</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-pink-600">18%</div>
+                            <div class="text-sm text-gray-600">银发族养宠渗透率</div>
+                            <div class="text-xs text-gray-500">数据来源：东方财富网</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-blue-600">42%</div>
+                            <div class="text-sm text-gray-600">Z世代养宠占比</div>
+                            <div class="text-xs text-gray-500">数据来源：搜狐网白皮书</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-green-600">9500万</div>
+                            <div class="text-sm text-gray-600">抑郁症患者总数</div>
+                            <div class="text-xs text-gray-500">数据来源：心理健康蓝皮书</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 社会影响数据 -->
+            <div class="chart-container mb-8 scroll-animate">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                    <span class="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
+                    社会影响数据
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="impact-stat">
+                        <div class="impact-number">3亿</div>
+                        <div class="text-sm text-gray-600">单身人口</div>
+                        <div class="text-xs text-gray-500 mt-1">情感需求强烈</div>
+                    </div>
+                    
+                    <div class="impact-stat">
+                        <div class="impact-number">9500万</div>
+                        <div class="text-sm text-gray-600">抑郁症患者</div>
+                        <div class="text-xs text-gray-500 mt-1">需要情感支持</div>
+                    </div>
+                    
+                    <div class="impact-stat">
+                        <div class="impact-number">4.3亿</div>
+                        <div class="text-sm text-gray-600">宠物总量</div>
+                        <div class="text-xs text-gray-500 mt-1">情感寄托载体</div>
+                    </div>
+                    
+                    <div class="impact-stat">
+                        <div class="impact-number">9000万</div>
+                        <div class="text-sm text-gray-600">流浪动物</div>
+                        <div class="text-xs text-gray-500 mt-1">治理成本超百亿</div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl">
+                    <h4 class="font-bold text-gray-800 mb-3">弃养原因分析</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span>走丢</span>
+                            <span class="font-bold text-purple-600">42%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>经济困难</span>
+                            <span class="font-bold text-orange-600">25%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>健康问题</span>
+                            <span class="font-bold text-blue-600">20%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>主动遗弃</span>
+                            <span class="font-bold text-red-600">15%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分享您的养宠故事 - 替换为share-story.html内容 -->
+            <div class="story-form-container mb-8 scroll-animate">
+                <h3 class="text-2xl font-bold mb-8 text-center">📖 分享您的养宠故事</h3>
+                <form id="storyForm">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">您的昵称</label>
+                            <input type="text" class="form-input" placeholder="请输入您的昵称" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">宠物类型</label>
+                            <select class="form-input" required>
+                                <option value="">请选择宠物类型</option>
+                                <option value="dog">狗狗</option>
+                                <option value="cat">猫咪</option>
+                                <option value="rabbit">兔子</option>
+                                <option value="bird">鸟类</option>
+                                <option value="other">其他</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">故事标题</label>
+                        <input type="text" class="form-input" placeholder="给您的故事起个标题" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">您的故事</label>
+                        <textarea class="form-input form-textarea" placeholder="分享您和宠物之间的温馨故事，如何相互陪伴、相互治愈..." required></textarea>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" class="bg-white text-orange-600 px-8 py-3 rounded-full font-bold hover:bg-gray-100 transition-colors">
+                            提交故事
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- 故事详情弹窗 -->
+    <div id="storyModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="storyModalTitle" class="text-2xl font-bold text-gray-800"></h3>
+                <button onclick="closeStoryModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="storyModalContent" class="text-gray-700"></div>
+        </div>
+    </div>
+
+    <!-- 新的底部导航栏脚本 -->
+    <script src="new-navigation.js"></script>
+    
+    <!-- 故事交互脚本 -->
+    <script src="stories-interaction.js"></script>
+    
+    <script>
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            initStoryForm();
+            initAnimations();
+        });
+
+        // 初始化图表
+        function initCharts() {
+            initCorrelationChart();
+        }
+
+        // 相关性散点图
+        function initCorrelationChart() {
+            const chart = echarts.init(document.getElementById('correlationChart'));
+            
+            // 模拟数据
+            const data = [
+                [15, 120, 800, '北京'],
+                [18, 140, 950, '上海'],
+                [12, 100, 600, '广州'],
+                [20, 160, 1100, '深圳'],
+                [16, 130, 850, '杭州'],
+                [14, 110, 700, '南京'],
+                [22, 180, 1200, '成都'],
+                [19, 150, 1000, '武汉'],
+                [17, 135, 900, '西安'],
+                [13, 95, 550, '青岛'],
+                [21, 170, 1150, '重庆'],
+                [25, 200, 1300, '天津'],
+                [23, 185, 1250, '苏州'],
+                [24, 195, 1280, '长沙'],
+                [26, 210, 1350, '郑州']
+            ];
+            
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(0,0,0,0.9)',
+                    borderColor: 'transparent',
+                    textStyle: { color: '#fff' },
+                    formatter: function(params) {
+                        const data = params.data;
+                        return `${data[3]}<br/>
+                                单身率: ${data[0]}%<br/>
+                                抑郁症患病率: ${data[1]}/10万<br/>
+                                养宠数量: ${data[2]}万只`;
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'value',
+                    name: '城市单身率(%)',
+                    nameTextStyle: { color: '#6B7280' },
+                    axisLine: { lineStyle: { color: '#E5E7EB' } },
+                    axisLabel: { color: '#6B7280' },
+                    splitLine: { lineStyle: { color: '#F3F4F6' } }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '养宠数量(万只)',
+                    nameTextStyle: { color: '#6B7280' },
+                    axisLine: { lineStyle: { color: '#E5E7EB' } },
+                    axisLabel: { color: '#6B7280' },
+                    splitLine: { lineStyle: { color: '#F3F4F6' } }
+                },
+                series: [{
+                    name: '城市数据',
+                    type: 'scatter',
+                    data: data,
+                    symbolSize: function(data) {
+                        return Math.sqrt(data[1]) * 2; // 根据抑郁症患病率调整气泡大小
+                    },
+                    itemStyle: {
+                        color: function(params) {
+                            const value = params.data[1]; // 抑郁症患病率
+                            if (value > 180) return '#E74C3C';
+                            if (value > 140) return '#F39C12';
+                            if (value > 100) return '#F1C40F';
+                            return '#27AE60';
+                        },
+                        opacity: 0.7
+                    },
+                    emphasis: {
+                        itemStyle: {
+                            opacity: 1,
+                            shadowBlur: 10,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }]
+            };
+            
+            chart.setOption(option);
+            
+            // 响应式
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        // 初始化故事表单
+        function initStoryForm() {
+            const form = document.getElementById('storyForm');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // 显示成功消息
+                alert('感谢您的分享！您的故事已提交，我们将在审核后展示。');
+                
+                // 重置表单
+                form.reset();
+            });
+        }
+
+        // 故事详情数据
+        const storyDetails = {
+            cancer: {
+                title: "疾病陪伴 - 生命的守护者",
+                content: `
+                    <div class="space-y-6">
+                        <div class="bg-pink-50 p-4 rounded-lg">
+                            <p class="text-pink-800 font-medium">"它陪我抗癌，是我活下去的勇气。"</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-3">故事正文</h4>
+                            <div class="text-gray-700 space-y-3">
+                                <p>小李是一位28岁的白领，去年被诊断出患有乳腺癌。在治疗期间，她的金毛犬"豆豆"成为了她最坚强的后盾。</p>
+                                <p>每次化疗回家，豆豆都会静静地趴在她身边，用温暖的眼神看着她。在最痛苦的时候，豆豆会轻轻舔她的手，仿佛在告诉她："妈妈，你要坚强。"</p>
+                                <p>"那段时间，我真的想过放弃。但是看到豆豆每天等我回家，我就告诉自己，我不能让它失望。"小李说，"是它给了我活下去的勇气。"</p>
+                                <p>现在小李的病情已经稳定，她和豆豆的故事也温暖了无数人的心。她说："宠物不仅仅是宠物，它们是家人，是生命的守护者。"</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h5 class="font-semibold text-gray-800 mb-2">数据支撑</h5>
+                            <div class="text-sm text-gray-600">
+                                研究显示，宠物陪伴能够显著提升癌症患者的生活质量，减轻治疗过程中的心理压力。
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            elderly: {
+                title: "老年情感 - 温暖的陪伴",
+                content: `
+                    <div class="space-y-6">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="text-blue-800 font-medium">"孩子不在身边，它是我的'老来伴'。"</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-3">故事正文</h4>
+                            <div class="text-gray-700 space-y-3">
+                                <p>张奶奶今年75岁，子女都在外地工作。自从老伴去世后，她一个人生活，常常感到孤单。</p>
+                                <p>去年，女儿给她送来了一只橘猫"咪咪"。起初，张奶奶还有些担心照顾不好，但咪咪很快就成为了她生活中的重要伙伴。</p>
+                                <p>每天清晨，咪咪都会准时叫她起床；做饭时，咪咪会在厨房门口等着；晚上看电视时，咪咪会蜷在她腿上打呼噜。</p>
+                                <p>"有了咪咪，我的生活重新有了色彩。"张奶奶笑着说，"它就像我的孩子一样，让我感受到了被需要的感觉。"</p>
+                                <p>现在，张奶奶每天都会带着咪咪在小区里散步，结识了很多同样养宠物的邻居，生活变得丰富多彩。</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h5 class="font-semibold text-gray-800 mb-2">相关数据</h5>
+                            <div class="text-sm text-gray-600">
+                                银发族养宠渗透率达18%，宠物在缓解老年人孤独感、提升生活质量方面发挥重要作用。
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            career: {
+                title: "城市奋斗 - 家的温暖",
+                content: `
+                    <div class="space-y-6">
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <p class="text-green-800 font-medium">"加班到深夜，看到它就有了家的感觉。"</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-3">故事正文</h4>
+                            <div class="text-gray-700 space-y-3">
+                                <p>小王是一名程序员，在北京打拼已经5年了。高强度的工作和快节奏的生活让他常常感到疲惫和孤独。</p>
+                                <p>去年，他收养了一只流浪猫"团团"。从此，他的生活发生了改变。</p>
+                                <p>"每天加班到很晚，回到家看到团团在门口等我，所有的疲惫都消失了。"小王说，"它让我感觉这个城市不再那么冰冷。"</p>
+                                <p>小王会给团团买最好的猫粮，定期带它体检，甚至为了团团购置了空气净化器。他说："虽然花费不少，但它给了我家的温暖，这是用钱买不到的。"</p>
+                                <p>在小王的朋友圈里，团团是绝对的主角。他说："它不仅仅是宠物，更是我在这个城市最亲密的家人。"</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h5 class="font-semibold text-gray-800 mb-2">群体特征</h5>
+                            <div class="text-sm text-gray-600">
+                                Z世代养宠人群占比达42%，宠物成为年轻人在城市中寻求情感寄托的重要方式。
+                            </div>
+                        </div>
+                    </div>
+                `
+            }
+        };
+        
+        // 显示故事详情
+        function showStory(storyId) {
+            const modal = document.getElementById('storyModal');
+            const title = document.getElementById('storyModalTitle');
+            const content = document.getElementById('storyModalContent');
+            
+            const story = storyDetails[storyId];
+            if (story) {
+                title.textContent = story.title;
+                content.innerHTML = story.content;
+                modal.style.display = 'flex';
+            }
+        }
+        
+        // 关闭故事弹窗
+        function closeStoryModal() {
+            document.getElementById('storyModal').style.display = 'none';
+        }
+
+        // 初始化动画
+        function initAnimations() {
+            // 图表容器动画
+            anime({
+                targets: '.chart-container',
+                opacity: [0, 1],
+                translateY: [30, 0],
+                duration: 800,
+                delay: anime.stagger(200),
+                easing: 'easeOutQuad'
+            });
+            
+            // 故事卡片动画
+            anime({
+                targets: '.story-card',
+                opacity: [0, 1],
+                scale: [0.8, 1],
+                duration: 600,
+                delay: anime.stagger(100, {start: 600}),
+                easing: 'easeOutBack'
+            });
+            
+            // 影响数据动画
+            anime({
+                targets: '.impact-stat',
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 600,
+                delay: anime.stagger(150, {start: 800}),
+                easing: 'easeOutQuad'
+            });
+            
+            // 表单动画
+            anime({
+                targets: '.story-form-container',
+                opacity: [0, 1],
+                scale: [0.95, 1],
+                duration: 800,
+                delay: 1000,
+                easing: 'easeOutQuad'
+            });
+            
+            // 滚动动画
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.scroll-animate').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // 点击弹窗外部关闭
+        window.addEventListener('click', function(event) {
+            const storyModal = document.getElementById('storyModal');
+            if (event.target === storyModal) {
+                closeStoryModal();
+            }
+        });
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // ESC键返回顶部
+            if (e.key === 'Escape') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            
+            // 数字键1-6快速导航
+            const pageMap = {
+                '1': 'market-overview',
+                '2': 'consumer-profile',
+                '3': 'industry-chain',
+                '4': 'policy-capital',
+                '5': 'social-mirror',
+                '6': 'conclusion'
+            };
+            
+            if (pageMap[e.key]) {
+                window.location.href = `${pageMap[e.key]}.html`;
+            }
+        });
+    </script>
+</body>
+</html>

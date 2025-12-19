@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产业链洞察 - 千亿"它经济"背后的情感密码</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.0/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #D4A574;
+            --secondary-color: #8B9467;
+            --accent-color: #E8B86D;
+            --text-dark: #2C3E50;
+            --text-medium: #7F8C8D;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .section-title {
+            font-family: 'Noto Serif SC', serif;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .chart-container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+        
+        .comparison-slider {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .comparison-before,
+        .comparison-after {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .comparison-before {
+            left: 0;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        }
+        
+        .comparison-after {
+            right: 0;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+        
+        .slider-handle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        
+        .slider-handle:active {
+            cursor: grabbing;
+        }
+        
+        .lifecycle-stage {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .lifecycle-stage::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .lifecycle-stage:hover::before {
+            left: 100%;
+        }
+        
+        .lifecycle-stage:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .growth-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .growth-high {
+            background: #27AE60;
+            color: white;
+        }
+        
+        .growth-medium {
+            background: #F39C12;
+            color: white;
+        }
+        
+        .growth-low {
+            background: #6C757D;
+            color: white;
+        }
+        
+        .floating-pet-icon {
+            position: absolute;
+            opacity: 0.1;
+            animation: floatIcon 12s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(-15px) rotate(240deg); }
+        }
+        
+        .ingredient-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .ingredient-item:last-child {
+            border-bottom: none;
+        }
+        
+        .ingredient-value {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        
+        .value-good {
+            background: #D4EDDA;
+            color: #155724;
+        }
+        
+        .value-average {
+            background: #FFF3CD;
+            color: #856404;
+        }
+        
+        .value-poor {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 12px 0;
+            z-index: 1000;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .nav-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .nav-btn-prev {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-medium);
+        }
+        
+        .nav-btn-prev:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-btn-next {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .nav-btn-next:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn-home {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .nav-btn-home:hover {
+            background: var(--text-medium);
+            transform: translateY(-2px);
+        }
+        
+        .waterfall-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 24px;
+            color: white;
+        }
+        
+        .waterfall-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .waterfall-icon {
+            font-size: 2rem;
+            margin-right: 16px;
+        }
+        
+        .waterfall-content h4 {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .waterfall-content p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <button onclick="history.back()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    <span>返回</span>
+                </button>
+                <h1 class="text-xl font-bold text-gray-800">产业链洞察</h1>
+            </div>
+            <div class="text-sm text-gray-600">
+                从基础喂养到全生命周期服务
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main class="pt-20 px-4 pb-24">
+        <div class="max-w-7xl mx-auto">
+            <!-- 页面标题 -->
+            <div class="text-center mb-12 pt-8">
+                <h1 class="section-title text-4xl md:text-6xl font-bold mb-6">
+                    产业链洞察
+                </h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    从基础喂养到全生命周期服务，深度解析市场结构、智能设备增长及成分对比
+                </p>
+            </div>
+
+            <!-- 浮动图标 -->
+            <div class="floating-pet-icon top-32 right-20 text-6xl">🐕</div>
+            <div class="floating-pet-icon top-1/2 left-16 text-4xl">🐱</div>
+            <div class="floating-pet-icon bottom-1/4 right-1/3 text-5xl">🐰</div>
+
+            <!-- 市场结构环形图 -->
+            <div class="chart-container mb-8">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                    <span class="w-3 h-3 bg-blue-500 rounded-full mr-3"></span>
+                    市场结构分布（2024年）
+                </h3>
+                <div id="marketStructureChart" class="h-96"></div>
+                <div class="mt-4 text-sm text-gray-600">
+                    <p class="mb-2"><strong>结构分析：</strong></p>
+                    <p class="text-xs">食品占比<span class="text-green-600 font-bold">52.8%</span>，医疗占比<span class="text-blue-600 font-bold">28%</span>，两者合计超80%</p>
+                </div>
+            </div>
+
+            <!-- 智能设备增长瀑布图 -->
+            <div class="chart-container mb-8">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                    <span class="w-3 h-3 bg-purple-500 rounded-full mr-3"></span>
+                    智能设备增长驱动分析
+                </h3>
+                <div class="waterfall-container">
+                    <div class="waterfall-item">
+                        <div class="waterfall-icon">📈</div>
+                        <div class="waterfall-content">
+                            <h4>销量翻倍增长</h4>
+                            <p>宠物摄像头2024年销量140万台，同比+100%；智能猫砂盆销量翻3.8倍</p>
+                        </div>
+                    </div>
+                    
+                    <div class="waterfall-item">
+                        <div class="waterfall-icon">💰</div>
+                        <div class="waterfall-content">
+                            <h4>价格下降30%</h4>
+                            <p>技术进步带来成本降低，智能设备价格更加亲民，普及率大幅提升</p>
+                        </div>
+                    </div>
+                    
+                    <div class="waterfall-item">
+                        <div class="waterfall-icon">🚀</div>
+                        <div class="waterfall-content">
+                            <h4>市场规模突破200亿</h4>
+                            <p>2023年智能宠物用品市场规模120亿元，2024年突破200亿元</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 智能成分对比器 -->
+            <div class="chart-container mb-8">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                    <span class="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
+                    智能成分对比器
+                </h3>
+                <div class="comparison-slider" id="comparisonSlider">
+                    <div class="comparison-before">
+                        <div class="flex items-center mb-4">
+                            <span class="text-3xl mr-3">🥫</span>
+                            <div>
+                                <h4 class="text-xl font-bold text-red-800">传统粮</h4>
+                                <p class="text-sm text-red-600">膨化工艺，成本导向</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="ingredient-item">
+                                <span>粗蛋白含量</span>
+                                <span class="ingredient-value value-average">25-30%</span>
+                            </div>
+                            <div class="ingredient-item">
+                                <span>微量元素配比</span>
+                                <span class="ingredient-value value-poor">一般</span>
+                            </div>
+                            <div class="ingredient-item">
+                                <span>水分含量</span>
+                                <span class="ingredient-value value-average">12-14%</span>
+                            </div>
+                            <div class="ingredient-item">
+                                <span>价格区间</span>
+                                <span class="ingredient-value value-good">20-50元/斤</span>
+                            </div>
+                            <div class="ingredient-item">
+                                <span>肾病风险</span>
+                                <span class="ingredient-value value-poor">较高</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-3 bg-red-50 rounded-lg">
+                            <p class="text-sm text-red-700">
+                                <strong>风险提示：</strong>传统粮营养成分相对单一，高盐高磷配方可能增加宠物肾病风险
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-after">
+                        <div class="flex items-center mb-4">
+                            <span class="text-3xl mr-3">🍖</span>
+                            <div>
+                                <h4 class="text-xl font-bold text-blue-800">高端烘焙粮</h4>
+                                <p class="text-sm text-blue-600">低温烘焙，营养导向</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="ingredient-item">
+                                <span>粗蛋白含量</span>
+                                <span class="ingredient-value value-good">35%+</span>
+                            </div>
+                            <div class="ingredient-item">
+                                <span>微量元素配比</span>
+                                <span class="ingredient-value value-good">精准配比</span>
+                            </div>
+                            <div class="ingredient-item">
+                                <span>水分含量</span>
+                                <span class="ingredient-value value-good">8-10%</span>
+                            </div>
+                            <div class="ingredient-item">
+                                <span>价格区间</span>
+                                <span class="ingredient-value value-average">60-150元/斤</span>
+                            </div>
+                            <div class="ingredient-item">
+                                <span>健康指数</span>
+                                <span class="ingredient-value value-good">优秀</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                            <p class="text-sm text-blue-700">
+                                <strong>健康优势：</strong>科学配比，低盐低磷，有效降低泌尿疾病风险，营养更易吸收
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-handle" id="sliderHandle">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path>
+                        </svg>
+                    </div>
+                </div>
+                
+                <!-- 核心差异对比 -->
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-lg text-center border border-yellow-200">
+                        <div class="text-2xl mb-2">⚡</div>
+                        <div class="font-semibold text-gray-800 mb-1">工艺差异</div>
+                        <div class="text-sm text-gray-600">膨化 vs 低温烘焙</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg text-center border border-green-200">
+                        <div class="text-2xl mb-2">💰</div>
+                        <div class="font-semibold text-gray-800 mb-1">价格差异</div>
+                        <div class="text-sm text-gray-600">3-5倍价格溢价</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-red-50 to-pink-50 p-4 rounded-lg text-center border border-red-200">
+                        <div class="text-2xl mb-2">🏥</div>
+                        <div class="font-semibold text-gray-800 mb-1">健康影响</div>
+                        <div class="text-sm text-gray-600">肾病风险降低60%</div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-gray-600">
+                        拖拽中间滑块查看详细对比 | 数据来源：肉垫Rodin品牌产品参数及行业定价标准
+                    </p>
+                </div>
+            </div>
+
+            <!-- 细分领域亮点 -->
+            <div class="grid lg:grid-cols-3 gap-8 mb-8">
+                <!-- 食品领域 -->
+                <div class="chart-container">
+                    <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                        <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                        食品领域亮点
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="lifecycle-stage">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-green-800">功能性产品</h4>
+                                <span class="growth-indicator growth-high">高增长</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">处方粮、益生菌、鱼油需求激增</p>
+                            <div class="text-xs text-green-600">
+                                高端烘焙粮粗蛋白含量35%+，价格溢价可达3倍
+                            </div>
+                        </div>
+                        
+                        <div class="lifecycle-stage">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-orange-800">618表现</h4>
+                                <span class="growth-indicator growth-high">+50%</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">高端烘焙粮成交额同比增50%</p>
+                            <div class="text-xs text-orange-600">
+                                精准配比、低水分易保存成为卖点
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 医疗领域 -->
+                <div class="chart-container">
+                    <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                        <span class="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
+                        医疗领域亮点
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="lifecycle-stage">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-red-800">宠物保险</h4>
+                                <span class="growth-indicator growth-medium">7.2%</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">参保率7.2%，覆盖870万只宠物</p>
+                            <div class="text-xs text-red-600">
+                                智能健康监测设备渗透率12.5%
+                            </div>
+                        </div>
+                        
+                        <div class="lifecycle-stage">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-purple-800">肾病预防</h4>
+                                <span class="growth-indicator growth-high">+18%</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">宠物肾病病例年增长18%</p>
+                            <div class="text-xs text-purple-600">
+                                低盐低磷配方可降低泌尿疾病风险
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 服务领域 -->
+                <div class="chart-container">
+                    <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                        <span class="w-3 h-3 bg-blue-500 rounded-full mr-3"></span>
+                        服务领域亮点
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="lifecycle-stage">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-blue-800">全生命周期</h4>
+                                <span class="growth-indicator growth-high">+20%</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">美容、殡葬、训练等细分赛道</p>
+                            <div class="text-xs text-blue-600">
+                                年增速均超20%，服务多元化
+                            </div>
+                        </div>
+                        
+                        <div class="lifecycle-stage">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-teal-800">场景图谱</h4>
+                                <span class="growth-indicator growth-medium">完善</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">幼宠护理→成宠健康→老年医疗</p>
+                            <div class="text-xs text-teal-600">
+                                覆盖宠物全生命周期的服务链条
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 全生命周期服务场景图谱 -->
+            <div class="chart-container mb-8">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                    <span class="w-3 h-3 bg-indigo-500 rounded-full mr-3"></span>
+                    全生命周期服务场景图谱
+                </h3>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white text-2xl">
+                            🐣
+                        </div>
+                        <h4 class="font-bold text-orange-800 mb-3">幼宠护理阶段</h4>
+                        <div class="space-y-2 text-sm text-orange-700">
+                            <div>• 疫苗接种</div>
+                            <div>• 营养配餐</div>
+                            <div>• 行为训练</div>
+                            <div>• 社会化培养</div>
+                        </div>
+                        <div class="mt-4 text-xs text-orange-600">
+                            0-1岁关键期
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white text-2xl">
+                            🐕
+                        </div>
+                        <h4 class="font-bold text-green-800 mb-3">成宠健康阶段</h4>
+                        <div class="space-y-2 text-sm text-green-700">
+                            <div>• 定期体检</div>
+                            <div>• 运动健身</div>
+                            <div>• 美容护理</div>
+                            <div>• 心理健康</div>
+                        </div>
+                        <div class="mt-4 text-xs text-green-600">
+                            1-7岁黄金期
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-2xl">
+                            🐾
+                        </div>
+                        <h4 class="font-bold text-purple-800 mb-3">老年医疗阶段</h4>
+                        <div class="space-y-2 text-sm text-purple-700">
+                            <div>• 慢性病管理</div>
+                            <div>• 疼痛缓解</div>
+                            <div>• 营养支持</div>
+                            <div>• 临终关怀</div>
+                        </div>
+                        <div class="mt-4 text-xs text-purple-600">
+                            7岁以上老年期
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
+                    <h4 class="font-bold text-gray-800 mb-4 text-center">服务产业链价值分析</h4>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h5 class="font-medium text-blue-800 mb-2">功能性食品</h5>
+                            <p class="text-sm text-blue-700">
+                                处方粮、益生菌、营养补充剂等专业化产品需求激增，年增速超30%
+                            </p>
+                        </div>
+                        <div>
+                            <h5 class="font-medium text-purple-800 mb-2">宠物医疗</h5>
+                            <p class="text-sm text-purple-700">
+                                专业化诊疗设备、基因检测、干细胞治疗等前沿技术加速应用
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+
+    <script>
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            initComparisonSlider();
+            initAnimations();
+        });
+
+        // 初始化图表
+        function initCharts() {
+            initMarketStructureChart();
+        }
+
+        // 市场结构环形图
+        function initMarketStructureChart() {
+            const chart = echarts.init(document.getElementById('marketStructureChart'));
+            
+            const data = [
+                { value: 52.8, name: '食品', itemStyle: { color: '#48BB78' } },
+                { value: 28.0, name: '医疗', itemStyle: { color: '#F6AD55' } },
+                { value: 12.4, name: '用品', itemStyle: { color: '#6366F1' } },
+                { value: 6.8, name: '服务', itemStyle: { color: '#F56565' } }
+            ];
+            
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(0,0,0,0.9)',
+                    borderColor: 'transparent',
+                    textStyle: { color: '#fff' },
+                    formatter: function(params) {
+                        const value = params.value;
+                        const name = params.name;
+                        const scale = params.data.scale;
+                        return `${name}<br/>占比: ${value}%<br/>规模: ${scale}亿元`;
+                    }
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    textStyle: { color: '#6B7280' }
+                },
+                series: [{
+                    name: '市场结构',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    center: ['60%', '50%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 8,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: true,
+                        position: 'outside',
+                        formatter: '{b}: {c}%',
+                        color: '#2C3E50',
+                        fontWeight: 'bold'
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: 16,
+                            fontWeight: 'bold'
+                        },
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    data: data.map(item => ({
+                        ...item,
+                        scale: Math.round(item.value * 7013 / 100)
+                    }))
+                }]
+            };
+            
+            chart.setOption(option);
+            
+            // 响应式
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        // 初始化对比滑块
+        function initComparisonSlider() {
+            const slider = document.getElementById('comparisonSlider');
+            const handle = document.getElementById('sliderHandle');
+            let isDragging = false;
+            
+            handle.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+            
+            // 触摸事件支持
+            handle.addEventListener('touchstart', startDrag);
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('touchend', stopDrag);
+            
+            function startDrag(e) {
+                isDragging = true;
+                e.preventDefault();
+            }
+            
+            function drag(e) {
+                if (!isDragging) return;
+                
+                const rect = slider.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+                
+                handle.style.left = percentage + '%';
+                
+                // 更新对比效果
+                const before = slider.querySelector('.comparison-before');
+                before.style.width = percentage + '%';
+            }
+            
+            function stopDrag() {
+                isDragging = false;
+            }
+        }
+
+        // 初始化动画
+        function initAnimations() {
+            // 图表容器动画
+            anime({
+                targets: '.chart-container',
+                opacity: [0, 1],
+                translateY: [30, 0],
+                duration: 800,
+                delay: anime.stagger(200),
+                easing: 'easeOutQuad'
+            });
+            
+            // 生命周期阶段动画
+            anime({
+                targets: '.lifecycle-stage',
+                opacity: [0, 1],
+                scale: [0.8, 1],
+                duration: 600,
+                delay: anime.stagger(100, {start: 600}),
+                easing: 'easeOutBack'
+            });
+            
+            // 对比滑块动画
+            anime({
+                targets: '.comparison-slider',
+                opacity: [0, 1],
+                scale: [0.95, 1],
+                duration: 800,
+                delay: 1000,
+                easing: 'easeOutQuad'
+            });
+            
+            // 瀑布图动画
+            anime({
+                targets: '.waterfall-item',
+                opacity: [0, 1],
+                translateX: [-50, 0],
+                duration: 600,
+                delay: anime.stagger(200, {start: 1200}),
+                easing: 'easeOutQuad'
+            });
+        }
+
+        // 页面导航
+        function navigateToPage(page) {
+            // 添加页面切换动画
+            anime({
+                targets: 'body',
+                opacity: [1, 0.8],
+                duration: 300,
+                easing: 'easeOutQuad',
+                complete: function() {
+                    window.location.href = `${page}.html`;
+                }
+            });
+        }
+
+        // 点击交互
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.lifecycle-stage')) {
+                const stage = e.target.closest('.lifecycle-stage');
+                const title = stage.querySelector('h4').textContent;
+                showStageDetail(title);
+            }
+        });
+
+        // 显示阶段详情
+        function showStageDetail(title) {
+            const details = {
+                '功能性产品': '功能性宠物食品市场正经历爆发式增长，处方粮、益生菌、营养补充剂等专业产品需求激增，年增速超过30%。高端烘焙粮凭借35%+的粗蛋白含量和精准配比，价格溢价可达3倍。',
+                '618表现': '618期间高端烘焙粮成交额同比增长50%，精准配比、低水分易保存成为主要卖点。消费者对宠物食品品质要求不断提升，愿意为科学配方和高品质原料支付溢价。',
+                '宠物保险': '宠物保险参保率达到7.2%，覆盖870万只宠物。智能健康监测设备渗透率12.5%，为宠物提供全方位的健康保障。保险+科技的模式正在重塑宠物医疗生态。',
+                '肾病预防': '宠物肾病病例年增长18%，低盐低磷配方可有效降低泌尿疾病风险。预防医学理念深入人心，宠物主越来越重视日常饮食对宠物健康的长远影响。',
+                '全生命周期': '美容、殡葬、训练等细分赛道年增速均超20%，服务多元化趋势明显。从幼宠到老年宠，覆盖宠物全生命周期的服务链条正在形成。',
+                '场景图谱': '幼宠护理→成宠健康→老年医疗的完整服务场景图谱已经建立。每个阶段都有专业化、个性化的服务产品，满足宠物在不同生命周期的需求。'
+            };
+            
+            if (details[title]) {
+                alert(`${title}\n\n${details[title]}`);
+            }
+        }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // ESC键返回顶部
+            if (e.key === 'Escape') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            
+            // 数字键1-6快速导航
+            const pageMap = {
+                '1': 'market-overview',
+                '2': 'consumer-profile',
+                '3': 'industry-chain',
+                '4': 'policy-capital',
+                '5': 'social-mirror',
+                '6': 'conclusion'
+            };
+            
+            if (pageMap[e.key]) {
+                navigateToPage(pageMap[e.key]);
+            }
+        });
+    </script>
+    
+    <!-- 新的底部导航栏脚本 -->
+    <script src="new-navigation.js"></script>
+</body>
+</html>

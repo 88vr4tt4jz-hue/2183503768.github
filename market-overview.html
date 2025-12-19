@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>市场全景 - 千亿"它经济"背后的情感密码</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.0/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #D4A574;
+            --secondary-color: #8B9467;
+            --accent-color: #E8B86D;
+            --text-dark: #2C3E50;
+            --text-medium: #7F8C8D;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .section-title {
+            font-family: 'Noto Serif SC', serif;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .chart-container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+        
+        .data-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .data-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .simulator-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .simulator-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(232, 184, 109, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(212, 165, 116, 0.4);
+        }
+        
+        .growth-result {
+            background: linear-gradient(135deg, #27AE60, #2ECC71);
+            color: white;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        
+        .growth-result.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .floating-number {
+            position: absolute;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+            color: var(--accent-color);
+            animation: floatNumber 3s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        @keyframes floatNumber {
+            0%, 100% { transform: translateY(0px) scale(1); opacity: 0.7; }
+            50% { transform: translateY(-15px) scale(1.1); opacity: 1; }
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+            max-width: 300px;
+            line-height: 1.4;
+        }
+        
+        .tooltip.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <button onclick="history.back()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    <span>返回</span>
+                </button>
+                <h1 class="text-xl font-bold text-gray-800">市场全景分析</h1>
+            </div>
+            <div class="text-sm text-gray-600">
+                数据来源：中国畜牧业协会、毕马威等权威机构
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main class="pt-20 px-4 pb-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- 页面标题 -->
+            <div class="text-center mb-12 pt-8">
+                <h1 class="section-title text-4xl md:text-6xl font-bold mb-6">
+                    市场全景
+                </h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    从3000亿到万亿的增长密码，解析中国宠物经济的规模动态、渗透率对比及区域分布
+                </p>
+            </div>
+
+            <!-- 核心数据卡片 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+                <div class="data-card text-center">
+                    <div class="text-3xl font-bold text-orange-600 mb-2 font-mono">7013亿</div>
+                    <div class="text-sm text-gray-600">2024年市场规模</div>
+                    <div class="text-xs text-green-600 mt-1">↑18.3%</div>
+                </div>
+                <div class="data-card text-center">
+                    <div class="text-3xl font-bold text-blue-600 mb-2 font-mono">22-24%</div>
+                    <div class="text-sm text-gray-600">家庭渗透率</div>
+                    <div class="text-xs text-orange-600 mt-1">潜力2-3倍</div>
+                </div>
+                <div class="data-card text-center">
+                    <div class="text-3xl font-bold text-green-600 mb-2 font-mono">25.4%</div>
+                    <div class="text-sm text-gray-600">年复合增长率</div>
+                    <div class="text-xs text-gray-500 mt-1">2015-2023</div>
+                </div>
+                <div class="data-card text-center">
+                    <div class="text-3xl font-bold text-purple-600 mb-2 font-mono">8114亿</div>
+                    <div class="text-sm text-gray-600">2025年预计</div>
+                    <div class="text-xs text-blue-600 mt-1">持续高增长</div>
+                </div>
+            </div>
+
+            <!-- 第一行图表 -->
+            <div class="grid lg:grid-cols-2 gap-8 mb-8">
+                <!-- 市场规模动态折线图 -->
+                <div class="chart-container">
+                    <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                        <span class="w-3 h-3 bg-blue-500 rounded-full mr-3"></span>
+                        市场规模动态趋势（2015-2025年）
+                    </h3>
+                    <div id="marketTrendChart" class="h-80"></div>
+                    <div class="mt-4 text-sm text-gray-600">
+                        <p class="mb-2"><strong>关键节点标注：</strong></p>
+                        <ul class="space-y-1 text-xs">
+                            <li>• <span class="text-red-500">2020年</span>：疫情后情感需求爆发，增长提速</li>
+                            <li>• <span class="text-green-500">2022年</span>：下沉市场崛起，成为增量主力</li>
+                            <li>• <span class="text-blue-500">2023年</span>：政策扶持加码，产业园区落地</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 中外渗透率对比 -->
+                <div class="chart-container">
+                    <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                        <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                        中外渗透率对比分析
+                    </h3>
+                    <div id="penetrationChart" class="h-80"></div>
+                    <div class="mt-4 text-sm text-gray-600">
+                        <p class="mb-2"><strong>增长空间分析：</strong></p>
+                        <p class="text-xs">以美国70%渗透率为基准，中国当前30%+的渗透率仍有<span class="text-orange-600 font-bold">2-3倍</span>的增长空间</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第二行图表 -->
+            <div class="grid lg:grid-cols-3 gap-8 mb-8">
+                <!-- 全国养宠热力地图 -->
+                <div class="chart-container lg:col-span-2">
+                    <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                        <span class="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
+                        全国养宠热力地图
+                    </h3>
+                    <div id="heatmapChart" class="h-96"></div>
+                    <div class="mt-4 text-sm text-gray-600">
+                        <p class="mb-2"><strong>产业带标注：</strong></p>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>• <span class="text-orange-600">鞍山</span>：宠物活体交易核心区</div>
+                            <div>• <span class="text-green-600">宿州</span>：宠物食品产业带（占全国12%产能）</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 增长模拟器 -->
+                <div class="chart-container">
+                    <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                        <span class="w-3 h-3 bg-purple-500 rounded-full mr-3"></span>
+                        增长模拟器
+                    </h3>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                预期家庭渗透率 (%)
+                            </label>
+                            <input type="range" id="penetrationSlider" min="30" max="70" value="50" 
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>30%</span>
+                                <span id="penetrationValue" class="font-bold text-purple-600">50%</span>
+                                <span>70%</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                单宠年均消费 (元)
+                            </label>
+                            <input type="number" id="consumptionInput" value="6280" min="3000" max="15000" 
+                                   class="simulator-input w-full">
+                        </div>
+                        
+                        <button onclick="calculateGrowth()" class="btn-primary w-full">
+                            计算市场规模
+                        </button>
+                        
+                        <div id="growthResult" class="growth-result">
+                            <div class="text-2xl font-bold mb-2" id="resultValue">-</div>
+                            <div class="text-sm" id="resultDescription">输入参数计算预期规模</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                        <h4 class="font-medium text-gray-800 mb-2">计算模型</h4>
+                        <p class="text-xs text-gray-600 leading-relaxed">
+                            基于中国5亿家庭总数，单宠年均消费6280元的市场调研数据，结合渗透率预测模型进行测算。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 产业带详情 -->
+            <div class="chart-container mb-8">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                    <span class="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>
+                    重点产业带深度解析
+                </h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl">
+                        <h4 class="font-bold text-orange-800 mb-4 flex items-center">
+                            <span class="text-2xl mr-2">🏭</span>
+                            鞍山 - 宠物活体交易核心区
+                        </h4>
+                        <div class="space-y-3 text-sm text-orange-700">
+                            <div class="flex justify-between">
+                                <span>市场地位：</span>
+                                <span class="font-medium">全国最大活体交易中心</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>交易规模：</span>
+                                <span class="font-medium">年交易量超百万只</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>主要品种：</span>
+                                <span class="font-medium">犬猫为主，异宠增长快</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>辐射范围：</span>
+                                <span class="font-medium">覆盖全国主要城市</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl">
+                        <h4 class="font-bold text-green-800 mb-4 flex items-center">
+                            <span class="text-2xl mr-2">🥫</span>
+                            宿州 - 宠物食品产业带
+                        </h4>
+                        <div class="space-y-3 text-sm text-green-700">
+                            <div class="flex justify-between">
+                                <span>产能占比：</span>
+                                <span class="font-medium">占全国12%产能</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>产业规模：</span>
+                                <span class="font-medium">年产值超200亿元</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>主要企业：</span>
+                                <span class="font-medium">乖宝、中宠等头部品牌</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>产品类型：</span>
+                                <span class="font-medium">主粮、零食、保健品</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 工具提示 -->
+    <div id="tooltip" class="tooltip"></div>
+
+    <script>
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            initSimulator();
+            initAnimations();
+            initTooltip();
+        });
+
+        // 初始化所有图表
+        function initCharts() {
+            initMarketTrendChart();
+            initPenetrationChart();
+            initHeatmapChart();
+        }
+
+        // 市场规模趋势图
+        function initMarketTrendChart() {
+            const chart = echarts.init(document.getElementById('marketTrendChart'));
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(0,0,0,0.9)',
+                    borderColor: 'transparent',
+                    textStyle: { color: '#fff' },
+                    formatter: function(params) {
+                        const data = params[0];
+                        const year = data.name;
+                        const value = data.value;
+                        let description = '';
+                        
+                        if (year === '2020') description = '<br/>疫情后情感需求爆发';
+                        else if (year === '2022') description = '<br/>下沉市场崛起';
+                        else if (year === '2023') description = '<br/>政策扶持加码';
+                        
+                        return `${year}年<br/>市场规模: ${value}亿元${description}`;
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+                    axisLine: { lineStyle: { color: '#E5E7EB' } },
+                    axisLabel: { color: '#6B7280' }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '市场规模(亿元)',
+                    nameTextStyle: { color: '#6B7280' },
+                    axisLine: { lineStyle: { color: '#E5E7EB' } },
+                    axisLabel: { color: '#6B7280' },
+                    splitLine: { lineStyle: { color: '#F3F4F6' } }
+                },
+                series: [{
+                    data: [978, 1226, 1538, 1929, 2420, 3035, 3806, 4936, 5928, 7013, 8114],
+                    type: 'line',
+                    smooth: true,
+                    lineStyle: {
+                        color: '#2E86AB',
+                        width: 3
+                    },
+                    itemStyle: {
+                        color: '#2E86AB',
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    areaStyle: {
+                        color: {
+                            type: 'linear',
+                            x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [
+                                { offset: 0, color: 'rgba(46, 134, 171, 0.3)' },
+                                { offset: 1, color: 'rgba(46, 134, 171, 0.1)' }
+                            ]
+                        }
+                    },
+                    markPoint: {
+                        data: [
+                            { name: '疫情后', coord: ['2020', 3035], itemStyle: { color: '#E74C3C' } },
+                            { name: '下沉市场', coord: ['2022', 4936], itemStyle: { color: '#27AE60' } },
+                            { name: '政策红利', coord: ['2023', 5928], itemStyle: { color: '#3498DB' } }
+                        ]
+                    }
+                }]
+            };
+            
+            chart.setOption(option);
+            
+            // 响应式
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        // 渗透率对比图
+        function initPenetrationChart() {
+            const chart = echarts.init(document.getElementById('penetrationChart'));
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(0,0,0,0.9)',
+                    borderColor: 'transparent',
+                    textStyle: { color: '#fff' },
+                    formatter: function(params) {
+                        const data = params[0];
+                        const country = data.name;
+                        const value = data.value;
+                        let analysis = '';
+                        
+                        if (country === '中国') {
+                            analysis = '<br/>仍有2-3倍增长空间';
+                        }
+                        
+                        return `${country}: ${value}%${analysis}`;
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['中国', '澳大利亚', '日本', '美国'],
+                    axisLine: { lineStyle: { color: '#E5E7EB' } },
+                    axisLabel: { color: '#6B7280' }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '渗透率(%)',
+                    nameTextStyle: { color: '#6B7280' },
+                    max: 80,
+                    axisLine: { lineStyle: { color: '#E5E7EB' } },
+                    axisLabel: { color: '#6B7280' },
+                    splitLine: { lineStyle: { color: '#F3F4F6' } }
+                },
+                series: [{
+                    data: [
+                        { value: 30, name: '中国', itemStyle: { color: '#E63946' } },
+                        { value: 55, name: '澳大利亚', itemStyle: { color: '#457B9D' } },
+                        { value: 57, name: '日本', itemStyle: { color: '#457B9D' } },
+                        { value: 70, name: '美国', itemStyle: { color: '#457B9D' } }
+                    ],
+                    type: 'bar',
+                    barWidth: '60%',
+                    label: {
+                        show: true,
+                        position: 'top',
+                        formatter: '{c}%',
+                        color: '#2C3E50',
+                        fontWeight: 'bold'
+                    },
+                    animationDelay: function (idx) {
+                        return idx * 200;
+                    }
+                }]
+            };
+            
+            chart.setOption(option);
+            
+            // 响应式
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        // 热力地图
+        function initHeatmapChart() {
+            const chart = echarts.init(document.getElementById('heatmapChart'));
+            
+            // 模拟省份数据
+            const provinceData = [
+                { name: '北京', value: 85, petOwners: 4500000, consumption: 28000000000 },
+                { name: '上海', value: 90, petOwners: 5200000, consumption: 33000000000 },
+                { name: '广东', value: 88, petOwners: 7800000, consumption: 48000000000 },
+                { name: '浙江', value: 75, petOwners: 3800000, consumption: 24000000000 },
+                { name: '江苏', value: 72, petOwners: 4200000, consumption: 26000000000 },
+                { name: '山东', value: 65, petOwners: 3500000, consumption: 22000000000 },
+                { name: '河南', value: 58, petOwners: 2800000, consumption: 18000000000 },
+                { name: '四川', value: 62, petOwners: 3200000, consumption: 20000000000 },
+                { name: '湖北', value: 55, petOwners: 2200000, consumption: 14000000000 },
+                { name: '湖南', value: 52, petOwners: 2000000, consumption: 13000000000 },
+                { name: '辽宁', value: 68, petOwners: 2400000, consumption: 15000000000 },
+                { name: '安徽', value: 45, petOwners: 1800000, consumption: 11000000000 }
+            ];
+            
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(0,0,0,0.9)',
+                    borderColor: 'transparent',
+                    textStyle: { color: '#fff' },
+                    formatter: function(params) {
+                        const data = params.data;
+                        return `${data.name}<br/>
+                                热度指数: ${data.value}<br/>
+                                宠主数量: ${(data.petOwners/10000).toFixed(0)}万人<br/>
+                                消费规模: ${(data.consumption/100000000).toFixed(1)}亿元`;
+                    }
+                },
+                visualMap: {
+                    min: 0,
+                    max: 100,
+                    left: 'left',
+                    top: 'bottom',
+                    text: ['高', '低'],
+                    calculable: true,
+                    inRange: {
+                        color: ['#E3F2FD', '#90CAF9', '#42A5F5', '#1E88E5', '#1565C0', '#0D47A1']
+                    }
+                },
+                series: [{
+                    name: '养宠热度',
+                    type: 'map',
+                    map: 'china',
+                    roam: true,
+                    data: provinceData,
+                    emphasis: {
+                        label: {
+                            show: true
+                        }
+                    }
+                }]
+            };
+            
+            // 使用中国地图
+            fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
+                .then(response => response.json())
+                .then(chinaJson => {
+                    echarts.registerMap('china', chinaJson);
+                    chart.setOption(option);
+                })
+                .catch(() => {
+                    // 如果地图加载失败，使用简化的图表
+                    const fallbackOption = {
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{b}: {c}'
+                        },
+                        series: [{
+                            type: 'pie',
+                            radius: '80%',
+                            data: provinceData,
+                            label: {
+                                formatter: '{b}\n{c}%'
+                            }
+                        }]
+                    };
+                    chart.setOption(fallbackOption);
+                });
+            
+            // 响应式
+            window.addEventListener('resize', () => chart.resize());
+        }
+
+        // 初始化模拟器
+        function initSimulator() {
+            const slider = document.getElementById('penetrationSlider');
+            const valueDisplay = document.getElementById('penetrationValue');
+            
+            slider.addEventListener('input', function() {
+                valueDisplay.textContent = this.value + '%';
+            });
+        }
+
+        // 计算增长
+        function calculateGrowth() {
+            const penetration = parseInt(document.getElementById('penetrationSlider').value);
+            const consumption = parseInt(document.getElementById('consumptionInput').value);
+            
+            // 基于5亿家庭总数计算
+            const totalHouseholds = 500000000;
+            const petHouseholds = Math.floor(totalHouseholds * (penetration / 100));
+            const marketSize = Math.floor(petHouseholds * consumption);
+            
+            const resultDiv = document.getElementById('growthResult');
+            const valueDiv = document.getElementById('resultValue');
+            const descDiv = document.getElementById('resultDescription');
+            
+            valueDiv.textContent = formatNumber(marketSize);
+            descDiv.innerHTML = `
+                基于${penetration}%渗透率<br/>
+                ${formatNumber(petHouseholds)}个养宠家庭<br/>
+                单宠年均消费${consumption}元
+            `;
+            
+            resultDiv.classList.add('show');
+            
+            // 添加浮动数字动画
+            createFloatingNumber(formatNumber(marketSize));
+        }
+
+        // 创建浮动数字
+        function createFloatingNumber(number) {
+            const floatingNumber = document.createElement('div');
+            floatingNumber.className = 'floating-number';
+            floatingNumber.textContent = number;
+            floatingNumber.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+            floatingNumber.style.top = '50%';
+            document.body.appendChild(floatingNumber);
+            
+            setTimeout(() => {
+                document.body.removeChild(floatingNumber);
+            }, 3000);
+        }
+
+        // 格式化数字
+        function formatNumber(num) {
+            if (num >= 100000000) {
+                return (num / 100000000).toFixed(1) + '亿';
+            } else if (num >= 10000) {
+                return (num / 10000).toFixed(1) + '万';
+            }
+            return num.toString();
+        }
+
+        // 初始化动画
+        function initAnimations() {
+            // 图表容器动画
+            anime({
+                targets: '.chart-container',
+                opacity: [0, 1],
+                translateY: [30, 0],
+                duration: 800,
+                delay: anime.stagger(200),
+                easing: 'easeOutQuad'
+            });
+            
+            // 数据卡片动画
+            anime({
+                targets: '.data-card',
+                opacity: [0, 1],
+                scale: [0.8, 1],
+                duration: 600,
+                delay: anime.stagger(100, {start: 400}),
+                easing: 'easeOutBack'
+            });
+        }
+
+        // 初始化工具提示
+        function initTooltip() {
+            const tooltip = document.getElementById('tooltip');
+            const chartElements = document.querySelectorAll('[data-tooltip]');
+            
+            chartElements.forEach(element => {
+                element.addEventListener('mouseenter', function(e) {
+                    const tooltipText = this.getAttribute('data-tooltip');
+                    tooltip.textContent = tooltipText;
+                    tooltip.classList.add('show');
+                    updateTooltipPosition(e);
+                });
+                
+                element.addEventListener('mouseleave', function() {
+                    tooltip.classList.remove('show');
+                });
+                
+                element.addEventListener('mousemove', updateTooltipPosition);
+            });
+        }
+
+        // 更新工具提示位置
+        function updateTooltipPosition(e) {
+            const tooltip = document.getElementById('tooltip');
+            const x = e.clientX;
+            const y = e.clientY;
+            
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = (y - 40) + 'px';
+        }
+    </script>
+    
+    <!-- 新的底部导航栏脚本 -->
+    <script src="new-navigation.js"></script>
+</body>
+</html>
